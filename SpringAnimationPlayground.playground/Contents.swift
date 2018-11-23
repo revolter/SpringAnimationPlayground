@@ -41,9 +41,9 @@ public class Argument: UIStackView {
 		self.labelName.text = name
 		self.labelName.font = UIFont(name: "Courier", size: UIFont.labelFontSize)
 
-		self.slider.value = defaultValue
 		self.slider.minimumValue = minimumValue
 		self.slider.maximumValue = maximumValue
+		self.slider.value = defaultValue
 		self.slider.addTarget(self, action: #selector(onSliderDrag), for: .valueChanged)
 
 		self.labelValue.font = UIFont(name: "Courier", size: UIFont.labelFontSize)
@@ -82,9 +82,10 @@ public class Canvas: UIView {
 
 	private let animations = UISegmentedControl(items: ["Translate X", "Scale"])
 
-	private let damping = Argument(name: "Damping", default: 0.5, minimum: 0.1)
-	private let initialVelocityX = Argument(name: "Velocity X", default: 0, maximum: 10)
-	private let initialVelocityY = Argument(name: "Velocity Y", default: 0, maximum: 10)
+	private let speed = Argument(name: "Speed:", default: 3, minimum: 0.3, maximum: 6)
+	private let damping = Argument(name: "Damping:", default: 0.5, minimum: 0.1)
+	private let initialVelocityX = Argument(name: "Velocity X:", default: 0, maximum: 10)
+	private let initialVelocityY = Argument(name: "Velocity Y:", default: 0, maximum: 10)
 
 	private var forwardsAnimator: UIViewPropertyAnimator?
 	private var backwardsAnimator: UIViewPropertyAnimator?
@@ -156,6 +157,7 @@ public class Canvas: UIView {
 
 		/* arguments */
 
+		self.content.addArrangedSubview(self.speed)
 		self.content.addArrangedSubview(self.damping)
 		self.content.addArrangedSubview(self.initialVelocityX)
 		self.content.addArrangedSubview(self.initialVelocityY)
@@ -188,7 +190,7 @@ public class Canvas: UIView {
 	}
 
 	private func createAnimator() {
-		let duration: TimeInterval = 3
+		let duration: TimeInterval = TimeInterval(self.speed.value)
 		let timingParameters = self.getCurrentTimingParameters()
 
 		self.forwardsAnimator = UIViewPropertyAnimator(duration: duration, timingParameters: timingParameters)
