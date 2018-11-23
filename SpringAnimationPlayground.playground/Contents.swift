@@ -60,6 +60,11 @@ public class Argument: UIStackView {
 
 public class Canvas: UIView {
 
+	enum AnimationType: Int {
+		case translateX
+		case scale
+	}
+
 	fileprivate static let size: CGSize = CGSize(width: 600, height: 300)
 
 	private static let contentMargin: CGFloat = 5
@@ -71,6 +76,11 @@ public class Canvas: UIView {
 	private let playgroundWrapper = UIView()
 	private let playground = UIView()
 	private let square = UIView()
+
+	private var leftSquareConstraint: NSLayoutConstraint?
+	private var centerSquareConstraint: NSLayoutConstraint?
+
+	private let animations = UISegmentedControl(items: ["Translate X", "Scale"])
 
 	private let damping = Argument(name: "Damping", default: 0.5, minimum: 0.1)
 	private let initialVelocityX = Argument(name: "Velocity X", default: 0, maximum: 10)
@@ -127,11 +137,22 @@ public class Canvas: UIView {
 
 		self.playground.addSubview(self.square)
 
-		self.square.leftAnchor.constraint(equalTo: self.playground.leftAnchor).isActive = true
+		self.leftSquareConstraint = self.square.leftAnchor.constraint(equalTo: self.playground.leftAnchor)
+
+		self.leftSquareConstraint?.isActive = true
+
+		self.centerSquareConstraint = self.square.centerXAnchor.constraint(equalTo: self.playground.centerXAnchor)
+
 		self.square.centerYAnchor.constraint(equalTo: self.playground.centerYAnchor).isActive = true
 
 		self.square.widthAnchor.constraint(equalToConstant: Canvas.squareSize).isActive = true
 		self.square.heightAnchor.constraint(equalToConstant: Canvas.squareSize).isActive = true
+
+		/* animations */
+
+		self.animations.selectedSegmentIndex = AnimationType.translateX.rawValue
+
+		self.content.addArrangedSubview(self.animations)
 
 		/* arguments */
 
@@ -147,7 +168,13 @@ public class Canvas: UIView {
 	public override func layoutSubviews() {
 		super.layoutSubviews()
 
+		self.playground.layoutIfNeeded()
+
 		self.createAnimator()
+	}
+
+	private func getCurrentAnimationType() -> AnimationType? {
+		return AnimationType(rawValue: self.animations.selectedSegmentIndex)
 	}
 
 	private func getCurrentTimingParameters() -> UISpringTimingParameters {
@@ -167,9 +194,30 @@ public class Canvas: UIView {
 		self.forwardsAnimator = UIViewPropertyAnimator(duration: duration, timingParameters: timingParameters)
 
 		self.forwardsAnimator?.addAnimations { [weak self] in
-			let maximumX = (Canvas.size.width - Canvas.contentMargin * 2) * Canvas.playgroundSizeFactor - Canvas.squareSize
+			guard let animationType = self?.getCurrentAnimationType() else {
+				return
+			}
 
-			self?.square.transform = CGAffineTransform(translationX: maximumX, y: 0)
+			switch animationType {
+			case .translateX:
+				self?.centerSquareConstraint?.isActive = false
+				self?.leftSquareConstraint?.isActive = true
+
+				self?.playground.layoutIfNeeded()
+
+				let maximumX = (Canvas.size.width - Canvas.contentMargin * 2) * Canvas.playgroundSizeFactor - Canvas.squareSize
+
+				self?.square.transform = CGAffineTransform(translationX: maximumX, y: 0)
+			case .scale:
+				self?.leftSquareConstraint?.isActive = false
+				self?.centerSquareConstraint?.isActive = true
+
+				self?.playground.layoutIfNeeded()
+
+				let maximumScale: CGFloat = 2
+
+				self?.square.transform = CGAffineTransform(scaleX: maximumScale, y: maximumScale)
+			}
 		}
 
 		self.forwardsAnimator?.addCompletion({ [weak self] _ in
