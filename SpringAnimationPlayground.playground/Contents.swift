@@ -156,6 +156,10 @@ public class Canvas: UIView {
 		return UISpringTimingParameters(dampingRatio: self.damping.value, initialVelocity: initialVelocity)
 	}
 
+	private func getCurrentAnimator() -> UIViewPropertyAnimator? {
+		return self.forwardsAnimator?.isRunning ?? false ? self.forwardsAnimator : self.backwardsAnimator
+	}
+
 	private func createAnimator() {
 		let duration: TimeInterval = 3
 		let timingParameters = self.getCurrentTimingParameters()
@@ -190,11 +194,14 @@ public class Canvas: UIView {
 extension Canvas: ArgumentDelegate {
 
 	public func didChangeValue() {
-		let currentAnimator = self.forwardsAnimator?.isRunning ?? false ? self.forwardsAnimator : self.backwardsAnimator
+		guard let currentAnimator = self.getCurrentAnimator() else {
+			return
+		}
+
 		let timingParameters = self.getCurrentTimingParameters()
 
-		currentAnimator?.pauseAnimation()
-		currentAnimator?.continueAnimation(withTimingParameters: timingParameters, durationFactor: 0)
+		currentAnimator.pauseAnimation()
+		currentAnimator.continueAnimation(withTimingParameters: timingParameters, durationFactor: 0)
 	}
 
 }
