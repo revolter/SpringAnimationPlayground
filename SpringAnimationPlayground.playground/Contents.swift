@@ -7,6 +7,7 @@ public protocol ArgumentDelegate {
 
 }
 
+@available(iOS 9.0, *)
 public class Argument: UIStackView {
 
 	private let labelName = UILabel()
@@ -15,9 +16,9 @@ public class Argument: UIStackView {
 
 	public var delegate: ArgumentDelegate?
 
-	public var value: CGFloat {
+	public var value: Double {
 		get {
-			return CGFloat(self.slider.value)
+			return Double(self.slider.value)
 		}
 	}
 
@@ -58,6 +59,7 @@ public class Argument: UIStackView {
 	}
 }
 
+@available(iOS 2.0, *)
 public class Canvas: UIView {
 
 	enum AnimationType: Int {
@@ -67,9 +69,9 @@ public class Canvas: UIView {
 
 	fileprivate static let size: CGSize = CGSize(width: 600, height: 300)
 
-	private static let contentMargin: CGFloat = 5
-	private static let playgroundSizeFactor: CGFloat = 0.5
-	private static let squareSize: CGFloat = 50
+	private static let contentMargin: Double = 5
+	private static let playgroundSizeFactor: Double = 0.5
+	private static let squareSize: Double = 50
 
 	private let content = UIStackView()
 
@@ -216,7 +218,7 @@ public class Canvas: UIView {
 
 				self?.playground.layoutIfNeeded()
 
-				let maximumScale: CGFloat = 2
+				let maximumScale: Double = 2
 
 				self?.square.transform = CGAffineTransform(scaleX: maximumScale, y: maximumScale)
 			}
